@@ -32,8 +32,8 @@ class DbEditor(object):
 
     def get_password(self, id_):
         try:
-            return self.data[id_]
-        except KeyErro:
+            return self.data['passwords'][id_]
+        except KeyError:
             raise ValueError("%s does not exist as a password id" % id_)
 
     def __str__(self):
@@ -101,6 +101,13 @@ if __name__=='__main__':
     op_add_parser.add_argument('name', type=str, help='Name for password')
     op_add_parser.add_argument('password', type=str, help='Password to add')
 
+    op_gen_parser = op_subparsers.add_parser('gen', help='Generate a password')
+    op_gen_parser.add_argument('-overwrite', action='store_true',
+                               help='Overwrite an existing password')
+    op_gen_parser.add_argument('-length', type=int, default=12,
+                               help='Length of password')
+    op_gen_parser.add_argument('name', type=str, help='Name for password')
+
     op_get_parser = op_subparsers.add_parser('get', help='Get a password')
     op_get_parser.add_argument('name', type=str, help='Name for password')
 
@@ -108,6 +115,9 @@ if __name__=='__main__':
 
     db = Db(res.db)
     if res.op == 'add':
-        db.set_password(res.name, res.password)
+        db.set_password(res.name, res.password, overwrite=res.overwrite)
+    elif res.op == 'gen':
+        pass_ = create_pass(res.length)
+        db.set_password(res.name, pass_, overwrite=res.overwrite)
     elif res.op == 'get':
         print(db.get_password(res.name))
